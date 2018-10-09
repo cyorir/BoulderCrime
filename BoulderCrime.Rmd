@@ -1,0 +1,35 @@
+---
+title: "BoulderCrime"
+author: "cyorir"
+date: "October 9, 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Boulder Crime Locations
+
+This is an exploration of the CrimeLocations dataset for the City of boulder. This dataset is viewable at:
+
+https://bouldercolorado.gov/open-data/crime-locations/
+
+The first step to mapping crime in Boulder is to geocode the addresses to obtain latitude and longitude. The tmaptools library is used for geocoding. Because geocoding through Open Street Map takes time, only the first 100 locations are used.
+
+```{r crime}
+suppressMessages(library(tmaptools))
+addresses <- read.csv("CrimeLocations.csv", stringsAsFactors = FALSE)
+addresses <- addresses$BLOCKADD
+addresses <- head(addresses,100)
+latlon <- geocode_OSM(gsub("Block","",paste0(addresses,", Boulder, CO")))
+```
+
+After geocoding, the crimes can be mapped over latitude and longitude. Only the points that appear to actually be near Boulder are used.
+
+```{r map}
+library(ggplot2)
+suppressMessages(library(dplyr))
+latlonb <- latlon %>% filter( lon < -105.2, lon > -106)
+ggplot(latlonb, aes(x=lon,y=lat))  + geom_point()
+```
